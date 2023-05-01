@@ -1,0 +1,121 @@
+{% extends "base.html" %} {% block content %}
+
+<p>【レビュー登録】</p>
+
+<form action="/add_review" method="post">
+  <div class="row mb-3">
+    <label for="input-game-name" class="col-sm-2 col-form-label"
+      >ゲーム名</label
+    >
+    <div class="col-sm-10">
+      <select
+        class="form-control"
+        id="input-game-name"
+        name="input-game-name"
+      >
+        {% for game in games %}
+        <option value="{{game.game_name}}">
+          {{game.game_name}}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <br />
+
+  <!-- ゲームプレイ状況 -->
+  <div class="row mb-3">
+    <label for="input-play-status" class="col-sm-2 col-form-label">ゲームプレイ状況</label>
+    <div class="col-sm-10">
+      <input
+        type="number"
+        class="form-control"
+        id="input-play-status"
+        name="input-play-status"
+      />
+    </div>
+  </div>
+
+  <!-- 評価 -->
+  <div class="row mb-3">
+    <label for="input-evaluation" class="col-sm-2 col-form-label">評価</label>
+    <div class="col-sm-10">
+      <input
+        type="number"
+        class="form-control"
+        id="input-evaluation"
+        name="input-evaluation"
+      />
+    </div>
+  </div>
+
+  <!-- カテゴリー -->
+  <div class="row mb-3">
+    <label for="input-category" class="col-sm-2 col-form-label">カテゴリー</label>
+    <div class="col-sm-10">
+      <input
+        type="string"
+        class="form-control"
+        id="input-category"
+        name="input-category"
+      />
+    </div>
+  </div>
+
+  <!-- 感想 -->
+  <div class="row mb-3">
+    <label for="input-impression" class="col-sm-2 col-form-label">感想</label>
+    <div class="col-sm-10">
+      <input
+        type="string"
+        class="form-control"
+        id="input-impression"
+        name="input-impression"
+      />
+    </div>
+  </div>
+
+  <!-- 登録日 -->
+
+  <div class="row mb-3">
+    <label for="input-register-date" class="col-sm-2 col-form-label">登録日</label>
+    <div class="col-sm-10">
+      <input
+        type="date"
+        class="form-control"
+        id="input-register-date"
+        name="input-register-date"
+      />
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-primary" formmethod="post">
+    レビュー登録
+  </button>
+</form>
+
+<br />
+<br />
+
+<p>【レビュー削除】</p>
+
+<form action="/delete_review" method="post">
+  <div class="row mb-3">
+    <label for="input-review-id" class="col-sm-2 col-form-label"
+      >削除するレビューID</label
+    >
+    <div class="col-sm-10">
+      <input
+        type="text"
+        class="form-control"
+        id="input-review-id"
+        name="input-review-id"
+      />
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary" formmethod="post">
+    レビュー削除
+  </button>
+</form>
+
+{% endblock %}
