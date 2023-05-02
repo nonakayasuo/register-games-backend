@@ -1,4 +1,4 @@
-from flask import render_template, request
+from flask import render_template, request, jsonify
 from models import app, db, Game, Review
 import sqlalchemy
 from flask_cors import CORS
@@ -15,6 +15,14 @@ def index():
     return render_template("index.html", games=games)
 
 
+# ゲーム一覧を取得
+@app.route("/game_list", methods=["GET"])
+def get_games():
+    games = Game.query.all()
+    games_json = [game.to_dict() for game in games]
+    return jsonify(games=games_json)
+
+
 # レビュー登録ページ
 @app.route("/review")
 def review():
@@ -27,8 +35,9 @@ def review():
 # ゲーム登録
 @app.route("/add_game", methods=["POST"])
 def add_game():
-    game_id = request.form["input-game-id"]
-    game_name = request.form["input-game-name"]
+    data = request.get_json()
+    game_id = data.get("game_id")
+    game_name = data.get("game_name")
     game = Game(game_id, game_name)
     try:
         db.session.add(game)
@@ -41,12 +50,13 @@ def add_game():
 # レビュー登録
 @app.route("/add_review", methods=["POST"])
 def add_review():
-    game_name = request.form["input-game-name"]
-    play_status = request.form["input-play-status"]
-    evaluation = request.form["input-evaluation"]
-    category = request.form["input-category"]
-    impression = request.form["input-impression"]
-    register_date = request.form["input-register-date"]
+    data = request.get_json()
+    game_name = data.get("game_name")
+    play_status = data.get("play_status")
+    evaluation = data.get("evaluation")
+    category = data.get("category")
+    impression = data.get("impression")
+    register_date = data.get("register_date")
     register_date = datetime.strptime(register_date, "%Y-%m-%d")
     game = Game.query.filter_by(game_name=game_name).first()
     review = Review(

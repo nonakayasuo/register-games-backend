@@ -21,6 +21,12 @@ class Game(db.Model):
 
     reviews = db.relationship("Review", backref="reviews", cascade="delete")
 
+    def to_dict(self):
+        return {
+            "game_id": self.game_id,
+            "game_name": self.game_name,
+        }
+
 
 class Review(db.Model):
     __tablename__ = "reviews"
