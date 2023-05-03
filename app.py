@@ -2,7 +2,6 @@ from flask import render_template, request, jsonify
 from models import app, db, Game, Review
 import sqlalchemy
 from flask_cors import CORS
-from datetime import datetime
 
 db.init_app(app)
 CORS(app)
@@ -11,8 +10,7 @@ CORS(app)
 # ページ遷移
 @app.route("/")
 def index():
-    games = Game.query.all()
-    return render_template("index.html", games=games)
+    return "This is the index page"
 
 
 # ゲーム一覧を取得
@@ -20,7 +18,7 @@ def index():
 def get_games():
     games = Game.query.all()
     games_json = [game.to_dict() for game in games]
-    return jsonify(games=games_json)
+    return jsonify(games_json)
 
 
 # レビュー登録ページ
@@ -44,7 +42,7 @@ def add_game():
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
         return render_template("error.html")
-    return render_template("confirm_added_game.html", game=game)
+    return jsonify({"game": game.to_dict()})
 
 
 # レビュー登録
@@ -57,10 +55,8 @@ def add_review():
     category = data.get("category")
     impression = data.get("impression")
     register_date = data.get("register_date")
-    register_date = datetime.strptime(register_date, "%Y-%m-%d")
-    game = Game.query.filter_by(game_name=game_name).first()
     review = Review(
-        game.game_id,
+        game_name,
         play_status,
         evaluation,
         category,

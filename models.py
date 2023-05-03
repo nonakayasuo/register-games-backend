@@ -32,23 +32,24 @@ class Review(db.Model):
     __tablename__ = "reviews"
     review_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     game_id = db.Column(db.Integer, db.ForeignKey("games.game_id"))
+    game_name = db.Column(db.String)
     play_status = db.Column(db.Integer)
     evaluation = db.Column(db.Integer)
     category = db.Column(db.String)
     impression = db.Column(db.String)
-    register_date = db.Column(db.DateTime)
+    register_date = db.Column(db.Date)
 
     def __init__(
         self,
         game_id,
-        play_situation,
+        play_status,
         evaluation,
         category,
         impression,
         register_date,
     ):
         self.game_id = game_id
-        self.play_situation = play_situation
+        self.play_status = play_status
         self.evaluation = evaluation
         self.category = category
         self.impression = impression
