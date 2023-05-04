@@ -75,15 +75,10 @@ def add_review():
         register_date=register_date,
     )
     try:
-        print("通過")
         db.session.add(review)
-        print("通過2")
         db.session.commit()
-        print("通過3")
     except sqlalchemy.exc.IntegrityError as sqlalchemy_error:
         db.session.rollback()
-        print("通過４")
-        print(str(sqlalchemy_error.orig))
         return jsonify({"error": str(sqlalchemy_error.orig)}), 400
     return jsonify({"review": review.to_dict()})
 
