@@ -2,6 +2,8 @@ from flask import render_template, request, jsonify
 from models import app, db, Game, Review
 import sqlalchemy
 from flask_cors import CORS
+from datetime import datetime
+import traceback
 
 db.init_app(app)
 CORS(app)
@@ -21,12 +23,12 @@ def get_games():
     return jsonify(games_json)
 
 
-# レビュー登録ページ
-@app.route("/review")
-def review():
-    games = Game.query.all()
-    reviews = Review.query.all()
-    return render_template("review.html", games=games, reviews=reviews)
+@app.route("/game_list/<int:game_id>", methods=["GET"])
+def get_game(game_id):
+    game = Game.query.get(game_id)
+    if game is None:
+        return jsonify({"error": "Game not found"}), 404
+    return jsonify(game.to_dict())
 
 
 # 機能系
@@ -34,14 +36,14 @@ def review():
 @app.route("/add_game", methods=["POST"])
 def add_game():
     data = request.get_json()
-    game_id = data.get("game_id")
     game_name = data.get("game_name")
-    game = Game(game_id, game_name)
+    game = Game(game_name=game_name)
     try:
         db.session.add(game)
         db.session.commit()
-    except sqlalchemy.exc.IntegrityError:
-        return render_template("error.html")
+    except sqlalchemy.exc.IntegrityError as sqlalchemy_error:
+        db.session.rollback()
+        return jsonify({"error": str(sqlalchemy_error.orig)}), 400
     return jsonify({"game": game.to_dict()})
 
 
@@ -49,27 +51,41 @@ def add_game():
 @app.route("/add_review", methods=["POST"])
 def add_review():
     data = request.get_json()
-    game_name = data.get("game_name")
+    game_id = data.get("game_id")
+    if game_id is None:
+        return jsonify({"error": "game_id is missing"}), 400
+    game = Game.query.get(game_id)
+    if game is None:
+        return jsonify({"error": "game_id does not exist"}), 400
     play_status = data.get("play_status")
+    play_status = int(play_status)
     evaluation = data.get("evaluation")
+    if evaluation is not None:
+        evaluation = int(evaluation)
     category = data.get("category")
     impression = data.get("impression")
     register_date = data.get("register_date")
+    register_date = datetime.fromisoformat(register_date).date()
     review = Review(
-        game_name,
-        play_status,
-        evaluation,
-        category,
-        impression,
-        register_date,
+        game_id=game_id,
+        play_status=play_status,
+        evaluation=evaluation,
+        category=category,
+        impression=impression,
+        register_date=register_date,
     )
     try:
+        print("通過")
         db.session.add(review)
+        print("通過2")
         db.session.commit()
-    except sqlalchemy.exc.IntegrityError:
-        return render_template("error.html")
-
-    return render_template("confirm_added_review.html", review=review)
+        print("通過3")
+    except sqlalchemy.exc.IntegrityError as sqlalchemy_error:
+        db.session.rollback()
+        print("通過４")
+        print(str(sqlalchemy_error.orig))
+        return jsonify({"error": str(sqlalchemy_error.orig)}), 400
+    return jsonify({"review": review.to_dict()})
 
 
 # レビュー削除
@@ -80,10 +96,17 @@ def delete_review():
     try:
         db.session.delete(review)
         db.session.commit()
-    except sqlalchemy.exc.IntegrityError:
-        return render_template("error.html")
+    except sqlalchemy.exc.IntegrityError as sqlalchemy_error:
+        db.session.rollback()
+        return jsonify({"error": str(sqlalchemy_error.orig)}), 400
 
-    return render_template("confirm_deleted_review.html", review=review)
+    return jsonify({"レビューを削除しました": review.to_dict()})
+
+
+@app.errorhandler(Exception)
+def handle_exception(error):
+    tb = traceback.format_exc()
+    return jsonify({"error": str(error), "traceback": tb}), 400
 
 
 if __name__ == "__main__":
