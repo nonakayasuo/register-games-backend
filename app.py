@@ -24,11 +24,21 @@ def get_games():
 
 
 @app.route("/game_list/<int:game_id>", methods=["GET"])
-def get_game(game_id):
+def get_game_list(game_id):
     game = Game.query.get(game_id)
     if game is None:
         return jsonify({"error": "Game not found"}), 404
     return jsonify(game.to_dict())
+
+
+@app.route("/review/<int:game_id>", methods=["GET"])
+def get_review(game_id):
+    if game_id is None:
+        return jsonify({"error": "Game ID not provided"}), 400
+    reviews = Review.query.filter_by(game_id=game_id).all()
+    if not reviews:
+        return jsonify({"error": "No reviews found"}), 404
+    return jsonify([review.to_dict() for review in reviews])
 
 
 # 機能系
